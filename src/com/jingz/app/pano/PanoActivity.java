@@ -50,18 +50,24 @@ import com.google.android.apps.lightcycle.util.UiUtil;
 
 public class PanoActivity extends Activity {
 
-	private IncrementalAligner aligner;
 	private AnalyticsHelper analyticsHelper;
+	
 	private LightCycleCaptureEventListener captureEventListener;
 	long captureStartTimeMs;
+	
+	// Storage
 	private LocalSessionStorage localStorage;
-	private LightCycleView mainView = null;
-	private RenderedGui renderedGui;
-	private SensorReader sensorReader = new SensorReader();
-	private boolean showOwnDoneButton = true;
-	private boolean showOwnUndoButton = true;
 	private StorageManager storageManager = StorageManagerFactory
 			.getStorageManager();
+
+	private SensorReader sensorReader = new SensorReader();
+
+	private IncrementalAligner aligner;
+	private RenderedGui renderedGui;
+	private LightCycleView mainView = null;
+	private boolean showOwnDoneButton = true;
+	private boolean showOwnUndoButton = true;
+	
 	private PowerManager.WakeLock wakeLock = null;
 	
 	static {
@@ -189,7 +195,7 @@ public class PanoActivity extends Activity {
 					callback.onCallback(null);
 				}
 			}
-		});
+		});	// ~aligner.shutdown()
 		
 	}
 
@@ -268,7 +274,6 @@ public class PanoActivity extends Activity {
 			}
 		}
 		
-		// :cond_1
 		localStorage = storageManager.getLocalSessionStorage();
 		LG.d("storage : " + localStorage.metadataFilePath + " "
 				+ localStorage.mosaicFilePath + " "
@@ -283,7 +288,6 @@ public class PanoActivity extends Activity {
 			return;
 		}
 		
-		// :cond_2
 		LocalBroadcastManager
 				.getInstance(this)
 				.sendBroadcast(
@@ -291,17 +295,15 @@ public class PanoActivity extends Activity {
 								"com.google.android.apps.lightcycle.panorama.PAUSE"));
 		
 		CameraPreview cameraPreview = null; 
-		if (Build.VERSION.SDK_INT >= 11) {
-			// :cond_4
+		if (Build.VERSION.SDK_INT < 11) {
 			cameraPreview = new NullSurfaceCameraPreview(cameraUtility);
 		} else {
 			cameraPreview = new TextureCameraPreview(cameraUtility);
 		}
 		
-		// :goto_1
 		renderedGui = new RenderedGui();
 		renderedGui.setShowOwnDoneButton(showOwnDoneButton);
-		// $1
+		
 		renderedGui.setDoneButtonVisibilityListener(new Callback<Boolean>() {
 			
 			@Override
@@ -315,7 +317,6 @@ public class PanoActivity extends Activity {
 		});
 		
 		renderedGui.setShowOwnUndoButton(showOwnUndoButton);
-		// $2
 		renderedGui.setUndoButtonVisibilityListener(new Callback<Boolean>() {
 
 			@Override
@@ -328,7 +329,6 @@ public class PanoActivity extends Activity {
 			}
 		});
 		
-		// $3
 		renderedGui.setUndoButtonStatusListener(new Callback<Boolean>() {
 
 			@Override
@@ -359,7 +359,6 @@ public class PanoActivity extends Activity {
 		mainView.setZOrderOnTop(true);
 		setContentView(mainView);
 		
-		// $4
 		mainView.registerMessageSink(new MessageSubscriber() {
 			
 			@Override
@@ -376,7 +375,6 @@ public class PanoActivity extends Activity {
 			
 		}
 		
-		// :cond_3
 		Size size = cameraPreview.initCamera(mainView.getPreviewCallback(),
 				320, 240, true);
 		int w = size.width;
@@ -393,7 +391,6 @@ public class PanoActivity extends Activity {
 		
 		UiUtil.lockCurrentScreenOrientation(this);
 		
-		// $5
 		mainView.setOnPhotoTakenCallback(new Callback<Void>() {
 
 			@Override
